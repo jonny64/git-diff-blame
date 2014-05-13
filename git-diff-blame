@@ -42,7 +42,7 @@ while (<$diff>) {
 	if (m{^diff --git ./(.*) ./\1$}) {
 		close $pre if defined $pre;
 		close $post if defined $post;
-		print;
+		#print;
 		$prefilename = "./" . $1;
 		$postfilename = "./" . $1;
 		$delete = $create = 0;
@@ -54,10 +54,10 @@ while (<$diff>) {
 		$postfilename = '/dev/null';
 	} elsif (m{^--- $prefilename$}) {
 		# ignore
-		print;
+		#print;
 	} elsif (m{^\+\+\+ $postfilename$}) {
 		# ignore
-		print;
+		#print;
 	} elsif (m{^@@ }) {
 		my ($o_ofs, $o_cnt, $n_ofs, $n_cnt)
 			= parse_hunk_header($_);
@@ -81,7 +81,8 @@ while (<$diff>) {
 		#scalar <$post>; # discard
 	} elsif (m{^\-}) {
 		my @lines = <$pre>;
-		print get_blame_summary(@lines);
+		my $summary = get_blame_summary (@lines);
+		print "$summary\n" if $summary;
 	} elsif (m{^\+}) {
 		#print get_blame_prefix(scalar <$post>), "\t", $_;
 	}
