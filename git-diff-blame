@@ -18,7 +18,7 @@ sub get_blame_prefix {
 my ($oldrev, $newrev) = @ARGV;
 $oldrev ||= 'HEAD';
 if ($newrev) {
-	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev) or die;
+	open($diff, '-|', 'git', '--no-pager', 'diff', "$oldrev...$newrev") or die;
 } else {
 	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev) or die;
 }
