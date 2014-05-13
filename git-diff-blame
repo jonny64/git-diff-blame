@@ -15,6 +15,19 @@ sub get_blame_prefix {
 	return $1;
 }
 
+sub get_blame_summary {
+	my (@lines) = @_;
+
+	my @summary;
+	foreach my $line (@lines) {
+		if ($line =~ m/^summary\s(.*)/i) {
+			push @summary, $1;
+		}
+	}
+
+	return join ("\r\n", @summary);
+}
+
 my ($oldrev, $newrev) = @ARGV;
 $oldrev ||= 'HEAD';
 if ($newrev) {
@@ -51,24 +64,25 @@ while (<$diff>) {
 		my $o_end = $o_ofs + $o_cnt - 1;
 		my $n_end = $n_ofs + $n_cnt - 1;
 		if (!$create) {
-			open($pre, '-|', 'git', 'blame', '-M', "-L$o_ofs,$o_end",
+			open($pre, '-|', 'git', 'blame', '-M', '--porcelain', "-L$o_ofs,$o_end",
 			     $oldrev, '--', $prefilename) or die;
 		}
 		if (!$delete) {
 			if ($newrev) {
-				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
+				open($post, '-|', 'git', 'blame', , '--porcelain', '-M', "-L$n_ofs,$n_end",
 				     $newrev, '--', $postfilename) or die;
 			} else {
-				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
+				open($post, '-|', 'git', 'blame', , '--porcelain', '-M', "-L$n_ofs,$n_end",
 				     '--', $postfilename) or die;
 			}
 		}
 	} elsif (m{^ }) {
-		print get_blame_prefix(scalar <$pre>), "\t", $_;
-		scalar <$post>; # discard
+		#print get_blame_prefix(scalar <$pre>), "\t", $_;
+		#scalar <$post>; # discard
 	} elsif (m{^\-}) {
-		print get_blame_prefix(scalar <$pre>), "\t", $_;
+		my @lines = <$pre>;
+		print get_blame_summary(@lines);
 	} elsif (m{^\+}) {
-		print get_blame_prefix(scalar <$post>), "\t", $_;
+		#print get_blame_prefix(scalar <$post>), "\t", $_;
 	}
 }
